@@ -16,6 +16,8 @@ private:
     float attackCooldownMax;
     int hp;
     int hpMax;
+    int points;
+
 public:
     Player();
 
@@ -24,6 +26,7 @@ public:
     const sf::FloatRect getBounds() const;
     const int& getHp() const;
     const int& getHpMax() const;
+    void gainPoints(int points);
     void setPosition(const sf::Vector2f pos);
     void setPosition(const float x, const float y);
     void setHp(const int hp);
