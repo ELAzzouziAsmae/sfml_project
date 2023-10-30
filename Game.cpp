@@ -46,6 +46,14 @@ void Game::initEnemies()
 {
     this->spawnTimerMax = 50.f;
     this->spawnTimer = this->spawnTimerMax;
+     // Ajoutez les LineEnemy
+     this->lineEnemies.push_back(new LineEnemy(
+     rand() % this->window->getSize().x - 20.f,
+     -100.f,
+     sf::Color::Blue, 
+     3.f, // Largeur
+     1.f // Hauteur
+ ));
 }
 
 void Game::initSystems()
@@ -183,10 +191,53 @@ void Game::updateBullets()
             delete bullet; // Delete the removed bullet
         }
     }
-}
+    // Collision entre les balles et les LineEnemy
+    std::vector<LineEnemy*> lineEnemiesToRemove;
 
+    for (auto* lineEnemy : this->lineEnemies)
+    {
+        for (auto* bullet : this->bullets)
+        {
+            if (lineEnemy->getBounds().intersects(bullet->getBounds()))
+            {
+            // Le joueur a touché le LineEnemy avec une balle, ajoutez des points
+            this->player->gainPoints(1);
 
+            // Marquez le LineEnemy pour suppression
+            lineEnemiesToRemove.push_back(lineEnemy);
+            }
+        }
 
+    // Collision entre le joueur et le LineEnemy
+    if (lineEnemy->getBounds().intersects(this->player->getBounds()))
+    {
+        // Le joueur a atteint le LineEnemy, ajoutez des points à la barre de points
+        int currentHp = this->player->getHp();
+        this->player->setHp(currentHp + 1);
+
+        // Supprimez le LineEnemy
+        auto it = std::find(this->lineEnemies.begin(), this->lineEnemies.end(), lineEnemy);
+        if (it != this->lineEnemies.end())
+        {
+            this->lineEnemies.erase(it);
+            delete lineEnemy;
+        }
+        }
+
+    }
+
+    // Supprimez les LineEnemy marqués pour suppression
+    for (auto* lineEnemy : lineEnemiesToRemove)
+    {
+        auto it = std::find(this->lineEnemies.begin(), this->lineEnemies.end(), lineEnemy);
+        if (it != this->lineEnemies.end())
+          {
+            this->lineEnemies.erase(it);
+            delete lineEnemy;
+          }
+    }
+
+    }
 void Game::renderGUI()
 {
     std::pair<sf::Text, sf::Text> textPair = this->gui1->render();
@@ -217,6 +268,7 @@ void Game::updateEnemies()
     if (this->spawnTimer >= this->spawnTimerMax)
     {
         this->enemies.push_back(new Enemy(rand() % this->window->getSize().x - 20.f, -100.f, enemySpeed));
+        this->lineEnemies.push_back(new LineEnemy(rand() % this->window->getSize().x - 20.f, -100.f, sf::Color::Blue, 3.f, 1));
         this->spawnTimer = 0.f;
     }
 
@@ -241,11 +293,10 @@ void Game::updateEnemies()
         }
         ++counter;
     }
-
-
-
-
-
+     for (auto* lineEnemy : this->lineEnemies)
+     {
+         lineEnemy->update();
+     }
 }
 
 void Game::updateCombat()
@@ -290,6 +341,25 @@ void Game::update()
     this->handleBonusCollision();
     this->gui1->UpdateinitguiPlayerPoints(this->points);
     this->gui3->updateguiplayerHpBar(this->player->getHp(), this->player->getHpMax());
+    for (auto* lineEnemy : this->lineEnemies)
+     {
+         lineEnemy->update();
+
+     // Collision entre le joueur et le LineEnemy
+     if (lineEnemy->getBounds().intersects(this->player->getBounds()))
+     {
+         // Le joueur a atteint le LineEnemy, ajoutez des points
+         this->player->gainPoints(1);
+
+         // Supprimez le LineEnemy
+         auto it = std::find(this->lineEnemies.begin(), this->lineEnemies.end(), lineEnemy);
+         if (it != this->lineEnemies.end())
+         {
+             this->lineEnemies.erase(it);
+             delete lineEnemy;
+         }
+     }
+     }
 }
 
 void Game::render()
@@ -312,6 +382,10 @@ void Game::render()
     {
         enemy->render(this->window);
 
+    }
+    for (auto* lineEnemy : this->lineEnemies)
+    {
+        lineEnemy->render(*this->window);
     }
     this->renderGUI();
     if (this->player->getHp() <= 0)
