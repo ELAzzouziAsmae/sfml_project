@@ -41,7 +41,13 @@ const sf::FloatRect Player::getBounds() const
 {
     return this->sprite.getGlobalBounds();
 }
+void Player::gainPoints(int points)
+{
+    this->points += points;
+    this->hp += points; // Ajoutez les points à la barre de points (hp)
 
+
+}
 const int& Player::getHp() const
 {
     return this->hp;
