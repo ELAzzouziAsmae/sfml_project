@@ -8,6 +8,7 @@
 #include "GameOver.h"
 #include "guiplayerHpBar.h"
 #include "Bonus.h"
+#include "LineEnemy.h"
 #include<map>
 
 class Game
@@ -20,7 +21,8 @@ private:
     sf::Texture worldBackgroundText;
     sf::Sprite worldBackground;
     unsigned points;
-
+     unsigned maxPoints;  // Variable pour le nombre maximal de points possibles
+     std::vector<LineEnemy*> lineEnemies;
     Player* player;
     std::vector<Bonus*> bonuses;
     sf::Texture bonusTexture;
